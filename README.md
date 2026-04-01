@@ -1,92 +1,53 @@
-# Aplicacion de matematicas
+# Rubidium Math App
 
-Base inicial para una app movil con:
+Aplicacion educativa enfocada en la resolucion de problemas de sistemas de mezcla, con historial por usuario, autenticacion y experiencia movil.
 
-- `React Native + Expo` en frontend
-- `Supabase` para auth y PostgreSQL
-- `Prisma Client` en backend
-- `ElevenLabs` para voz
+El proyecto combina una app movil en Expo/React Native con un backend en Node.js y una base de datos en Supabase. Tambien integra una capa pensada para experiencias de voz con ElevenLabs.
 
-## Objetivo del modelo de datos
+## Demo Scope
 
-Cada usuario debe tener su historial aislado:
+- Inicio de sesion con Supabase Auth
+- Resolucion de ejercicios de mezcla con pasos intermedios
+- Historial personalizado por usuario
+- Backend con rutas protegidas por token
+- Base preparada para experiencias de voz y seguimiento de progreso
 
-- sus problemas matematicos
-- sus soluciones paso a paso
-- sus sesiones de voz
-- su progreso por tema
+## Stack
 
-La separacion se logra con dos capas:
+- Mobile: React Native, Expo, TypeScript
+- Backend: Node.js, Express, TypeScript
+- Database/Auth: Supabase, PostgreSQL, Row Level Security
+- ORM: Prisma
+- Voice: ElevenLabs
 
-1. `userId` en las tablas de negocio
-2. `Row Level Security` en Supabase usando `auth.uid()`
-
-## Estructura creada
+## Architecture
 
 ```text
-backend/
-  src/
-  prisma/
-    schema.prisma
-  package.json
-  tsconfig.json
-  .env.example
-mobile/
-  src/
-  package.json
-  app.json
-  .env.example
-supabase/
-  rls.sql
+mobile/     -> app movil para autenticacion, resolucion e historial
+backend/    -> API para resolver ejercicios y persistir datos
+supabase/   -> scripts SQL, vistas administrativas y politicas RLS
+elevenlabs/ -> base de conocimiento para la experiencia de voz
 ```
 
-## Tablas principales
+Flujo principal:
 
-- `profiles`: datos publicos del usuario autenticado
-- `topics`: catalogo de temas matematicos
-- `problems`: historial principal de ejercicios enviados
-- `solution_steps`: pasos de resolucion por problema
-- `voice_sessions`: sesiones o conversaciones de voz
-- `voice_messages`: mensajes dentro de una sesion de voz
-- `user_topic_stats`: progreso acumulado por tema
+1. El usuario inicia sesion en la app movil con Supabase.
+2. La app obtiene un `access_token`.
+3. El token se envia al backend en `Authorization: Bearer ...`.
+4. El backend valida al usuario y guarda sus ejercicios.
+5. El historial se consulta de forma aislada por usuario.
 
-En Supabase estas tablas se crean con prefijo `math_mobile_` para distinguirlas de otros sistemas del mismo proyecto.
+## Main Features
 
-Por seguridad, las contrasenas no se guardan en tablas propias de la app. El manejo de credenciales vive en `Supabase Auth`, y para administracion se pueden usar vistas seguras con metadatos del perfil y de sus consultas.
+### Mobile App
 
-## Flujo recomendado
+- Login y persistencia de sesion
+- Pantalla principal con historial
+- Resolucion de problemas de mezcla
+- Navegacion a detalle de ejercicios
+- Base preparada para interacciones por voz
 
-1. El usuario inicia sesion con Supabase Auth.
-2. La app manda el token al backend.
-3. El backend valida al usuario.
-4. Se guarda cada problema con `userId`.
-5. Se guardan pasos, solucion final y metadatos de voz.
-6. El historial se consulta filtrado por el usuario actual.
-
-## Nota importante sobre Prisma
-
-`Prisma Client` debe usarse en el backend, no directamente en la app movil.
-
-La app movil puede usar:
-
-- `Supabase Auth`
-- `Supabase Storage`
-- llamadas HTTP a tu API
-
-## Siguiente paso recomendado
-
-Despues de esta base, lo ideal es continuar con:
-
-- conexion real con tu proyecto de Supabase
-- migraciones o `db push` para crear tablas
-- autenticacion desde la app movil
-- sincronizacion con ElevenLabs para guardar transcript y resumen
-
-## Backend base ya creado
-
-Se dejo un backend inicial en `Node + TypeScript + Express + Prisma`.
-
-Rutas incluidas:
+### Backend API
 
 - `GET /health`
 - `GET /history/me`
@@ -95,59 +56,68 @@ Rutas incluidas:
 - `POST /history/problems`
 - `POST /mixing/solve`
 
-Estas rutas esperan un token `Bearer` de Supabase para identificar al usuario.
+## Data Model
 
-`GET /history/me` asegura que exista el perfil del usuario autenticado en `math_mobile_profiles`.
-`POST /mixing/solve` resuelve un sistema de mezcla con volumen constante, guarda el desarrollo paso a paso y lo agrega al historial.
+El proyecto esta diseñado para mantener el historial academico aislado por usuario.
 
-## Como arrancarlo
+Tablas principales:
 
-1. Copia `backend/.env.example` a `backend/.env`
-2. Coloca tus credenciales reales de Supabase
-3. Entra a la carpeta `backend`
-4. Ejecuta `npm install`
-5. Ejecuta `npx prisma generate`
-6. Ejecuta `npm run build`
-7. Ejecuta `npm run dev`
+- `profiles`
+- `topics`
+- `problems`
+- `solution_steps`
+- `voice_sessions`
+- `voice_messages`
+- `user_topic_stats`
 
-## Nota de arquitectura
+La separacion de datos se apoya en:
 
-Por compatibilidad con `Prisma Client`, el backend base se dejo en `Node/TypeScript`.
+- `userId` en las tablas de negocio
+- politicas de `Row Level Security` con `auth.uid()`
 
-Si despues quieres motor matematico mas avanzado, puedes agregar:
+## Local Setup
 
-- un modulo interno en este backend, o
-- un microservicio aparte en Python
+### Backend
 
-## Frontend movil base ya creado
+```bash
+cd backend
+cp .env.example .env
+npm install
+npx prisma generate
+npm run dev
+```
 
-Se dejo una base inicial en `Expo + React Native` con:
+### Mobile
 
-- login con Supabase
-- sesion persistente
-- formulario para resolver sistemas de mezcla
-- consulta del historial al backend
-- pantalla inicial de historial por usuario
+```bash
+cd mobile
+cp .env.example .env
+npm install
+npm start
+```
 
-Archivos clave:
+## Environment Notes
 
-- `mobile/App.tsx`
-- `mobile/src/lib/supabase.ts`
-- `mobile/src/lib/api.ts`
-- `mobile/src/screens/LoginScreen.tsx`
-- `mobile/src/screens/HomeScreen.tsx`
+- `backend/.env` y `mobile/.env` no se suben al repositorio
+- para probar en telefono fisico, la app movil debe apuntar a la IP local de tu equipo o usar la deteccion de host en desarrollo
 
-## Como arrancar la app movil
+## Why This Project Matters
 
-1. Copia `mobile/.env.example` a `mobile/.env`
-2. Coloca tu `SUPABASE_URL`, `SUPABASE_ANON_KEY` y la URL del backend
-3. Entra a la carpeta `mobile`
-4. Ejecuta `npm install`
-5. Ejecuta `npm start`
+Este proyecto muestra trabajo full stack con enfoque en producto:
 
-## Conexion entre app y backend
+- diseno de experiencia movil
+- backend tipado con Express y Prisma
+- integracion con Supabase Auth
+- modelado de datos con seguridad por usuario
+- preparacion para funciones de voz y aprendizaje asistido
 
-- La app inicia sesion con Supabase
-- Supabase entrega un `access_token`
-- La app manda ese token al backend en `Authorization: Bearer ...`
-- El backend identifica al usuario y devuelve solo su historial
+## Roadmap
+
+- mejorar el contenido visual del repositorio con capturas o GIFs
+- agregar tests para la logica matematica y rutas del backend
+- publicar una build instalable de la app movil
+- ampliar los tipos de problemas matematicos soportados
+
+## Repository
+
+- GitHub: `https://github.com/elpopotes56/aplicacion-de-matematicas`
