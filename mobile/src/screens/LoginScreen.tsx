@@ -236,7 +236,7 @@ export function LoginScreen({ navigation }: Props) {
     const message = error.message.toLowerCase();
 
     if (message.includes("invalid login credentials")) {
-      return "El correo o la contrasena no coinciden.";
+      return "El correo o la contraseña no coinciden.";
     }
 
     if (message.includes("email rate limit exceeded")) {
@@ -252,7 +252,7 @@ export function LoginScreen({ navigation }: Props) {
     }
 
     if (message.includes("password should be at least")) {
-      return "La contrasena es demasiado corta. Usa al menos 6 caracteres.";
+      return "La contraseña es demasiado corta. Usa al menos 6 caracteres.";
     }
 
     return currentMode === "login"
@@ -294,7 +294,7 @@ export function LoginScreen({ navigation }: Props) {
 
   async function handleSubmit() {
     if (!normalizedEmail || !password) {
-      Alert.alert("Faltan datos", "Completa tu correo y contrasena.");
+      Alert.alert("Faltan datos", "Completa tu correo y contraseña.");
       return;
     }
 
@@ -304,12 +304,12 @@ export function LoginScreen({ navigation }: Props) {
     }
 
     if (mode === "register" && password !== confirmPassword) {
-      Alert.alert("Contrasenas distintas", "La confirmacion de contrasena no coincide.");
+      Alert.alert("Contraseñas distintas", "La confirmacion de contraseña no coincide.");
       return;
     }
 
     if (mode === "register" && password.length < 6) {
-      Alert.alert("Contrasena corta", "Usa una contrasena de al menos 6 caracteres.");
+      Alert.alert("Contraseña corta", "Usa una contraseña de al menos 6 caracteres.");
       return;
     }
 
@@ -440,7 +440,7 @@ export function LoginScreen({ navigation }: Props) {
               <PasswordField
                 autoComplete="off"
                 inputRef={passwordInputRef}
-                label="Contrasena"
+                label="Contraseña"
                 onChangeText={setPassword}
                 onToggleVisibility={() => {
                   playButtonSound();
@@ -451,7 +451,7 @@ export function LoginScreen({ navigation }: Props) {
                     ? confirmPasswordInputRef.current?.focus()
                     : passwordInputRef.current?.blur()
                 }
-                placeholder="Escribe tu contrasena"
+                placeholder="Escribe tu contraseña"
                 value={password}
                 visible={showPassword}
               />
@@ -459,7 +459,7 @@ export function LoginScreen({ navigation }: Props) {
                 <View style={styles.validationRow}>
                   <View style={[styles.strengthDot, { backgroundColor: passwordStrength.color }]} />
                   <Text style={[styles.validationText, { color: passwordStrength.color }]}>
-                    Seguridad de contrasena: {passwordStrength.label}
+                    Seguridad de contraseña: {passwordStrength.label}
                   </Text>
                 </View>
               ) : null}
@@ -468,20 +468,20 @@ export function LoginScreen({ navigation }: Props) {
                   <PasswordField
                     autoComplete="off"
                     inputRef={confirmPasswordInputRef}
-                    label="Confirmar contrasena"
+                    label="Confirmar contraseña"
                     onChangeText={setConfirmPassword}
                     onToggleVisibility={() => {
                       playButtonSound();
                       setShowConfirmPassword((current) => !current);
                     }}
                     onSubmitEditing={() => confirmPasswordInputRef.current?.blur()}
-                    placeholder="Repite tu contrasena"
+                    placeholder="Repite tu contraseña"
                     value={confirmPassword}
                     visible={showConfirmPassword}
                   />
                   {confirmPassword.length > 0 ? (
                     <Text style={[styles.validationText, confirmMatches ? styles.validationSuccess : styles.validationError]}>
-                      {confirmMatches ? "Las contrasenas coinciden" : "Las contrasenas no coinciden"}
+                      {confirmMatches ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}
                     </Text>
                   ) : null}
                 </>
@@ -516,7 +516,7 @@ export function LoginScreen({ navigation }: Props) {
                   }}
                   style={styles.ghostButton}
                 >
-                  <Text style={styles.ghostButtonText}>Olvide mi contrasena</Text>
+                  <Text style={styles.ghostButtonText}>Olvide mi contraseña</Text>
                 </Pressable>
               ) : null}
               <Pressable
@@ -547,7 +547,7 @@ export function LoginScreen({ navigation }: Props) {
                     onPress={() =>
                       Alert.alert(
                         "Privacidad",
-                        "Rubidium usa Supabase Auth para gestionar el acceso. La app no guarda contrasenas en texto plano dentro de sus propias tablas."
+                        "Rubidium usa Supabase Auth para gestionar el acceso. La app no guarda contraseñas en texto plano dentro de sus propias tablas."
                       )
                     }
                   >

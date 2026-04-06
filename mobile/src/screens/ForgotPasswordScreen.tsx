@@ -35,7 +35,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!isValidEmail(normalizedEmail)) {
-      Alert.alert("Correo invalido", "Escribe un correo valido para recuperar tu contrasena.");
+      Alert.alert("Correo invalido", "Escribe un correo valido para recuperar tu contraseña.");
       return;
     }
 
@@ -71,7 +71,7 @@ export function ForgotPasswordScreen({ navigation }: Props) {
               <Text style={styles.eyebrow}>Recuperacion segura</Text>
               <Text style={styles.title}>Recupera tu acceso a Rubidium</Text>
               <Text style={styles.subtitle}>
-                Escribe el correo con el que te registraste y te enviaremos un enlace para restablecer tu contrasena.
+                Escribe el correo con el que te registraste y te enviaremos un enlace para restablecer tu contraseña.
               </Text>
             </View>
 

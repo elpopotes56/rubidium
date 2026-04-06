@@ -302,12 +302,23 @@ function ConnectedVoiceExperienceCard({
       return;
     }
 
-    const update =
-      `Problema actual en Rubidium: ${contextSummary}. ` +
-      `Explica siempre en espanol, de forma didactica y conectada al sistema de mezcla.`;
+    // Delay sending the contextual update to avoid the LiveKit
+    // "cannot send signal request before connected" race condition.
+    // The SDK emits 'connected' slightly before the signaling channel is ready.
+    const timer = setTimeout(() => {
+      if (contextSentRef.current) {
+        return;
+      }
 
-    sendContextualUpdate(update);
-    contextSentRef.current = true;
+      const update =
+        `Problema actual en Rubidium: ${contextSummary}. ` +
+        `Explica siempre en espanol, de forma didactica y conectada al sistema de mezcla.`;
+
+      sendContextualUpdate(update);
+      contextSentRef.current = true;
+    }, 600);
+
+    return () => clearTimeout(timer);
   }, [contextSummary, sendContextualUpdate, status]);
 
   useEffect(() => {
@@ -455,15 +466,11 @@ function ConnectedVoiceExperienceCard({
             }
 
             startSession({
+              agentId: elevenLabsAgentId,
               dynamicVariables: {
                 problem_context: contextSummary,
                 problem_id: problemId ?? "sin_problema",
                 problem_title: title
-              },
-              overrides: {
-                agent: {
-                  language: "es"
-                }
               }
             });
           }}

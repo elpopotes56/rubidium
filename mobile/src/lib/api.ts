@@ -1,35 +1,11 @@
-import { NativeModules, Platform } from "react-native";
-
 import { supabase } from "./supabase";
 
+// When using `adb reverse tcp:PORT tcp:PORT`, 127.0.0.1 on the device is
+// tunnelled directly to the PC — do NOT remap the hostname.
+// If you ever switch to Wi-Fi (no USB cable), change EXPO_PUBLIC_API_URL to
+// the PC's local IP (e.g. http://192.168.x.x:4000) instead.
 function normalizeApiUrl(rawUrl: string) {
-  const trimmedUrl = rawUrl.trim();
-
-  if (!trimmedUrl) {
-    return "";
-  }
-
-  // When the app runs on a physical device, localhost/127.0.0.1 point to the
-  // phone itself. In dev we can infer the computer host from Metro's bundle URL.
-  if (Platform.OS !== "web") {
-    try {
-      const parsedUrl = new URL(trimmedUrl);
-
-      if (parsedUrl.hostname === "127.0.0.1" || parsedUrl.hostname === "localhost") {
-        const scriptUrl = NativeModules.SourceCode?.scriptURL as string | undefined;
-
-        if (scriptUrl) {
-          const bundleUrl = new URL(scriptUrl);
-          parsedUrl.hostname = bundleUrl.hostname;
-          return parsedUrl.toString().replace(/\/$/, "");
-        }
-      }
-    } catch {
-      return trimmedUrl.replace(/\/$/, "");
-    }
-  }
-
-  return trimmedUrl.replace(/\/$/, "");
+  return rawUrl.trim().replace(/\/$/, "");
 }
 
 const apiUrl = normalizeApiUrl(process.env.EXPO_PUBLIC_API_URL ?? "");

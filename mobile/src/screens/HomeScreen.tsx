@@ -12,6 +12,8 @@ import {
   TextInput,
   View
 } from "react-native";
+import { BlurView } from "expo-blur";
+import Animated, { FadeIn, FadeOut, LinearTransition } from "react-native-reanimated";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -287,7 +289,7 @@ function MixingVisualizer({
   const balanceLabel = inflowRate === outflowRate ? "Balance estable" : "Balance variable";
 
   return (
-    <View style={styles.visualCard}>
+    <Animated.View entering={FadeIn.delay(100).duration(500)} layout={LinearTransition.springify()} style={styles.visualCard}>
       <View style={styles.visualHeader}>
         <Text style={styles.visualTitle}>Vista del sistema</Text>
         <Text style={styles.visualSubtitle}>Volumen constante</Text>
@@ -371,7 +373,7 @@ function MixingVisualizer({
         <MetricChip label="C. entrada" value={`${inflowConcentration || 0} kg/L`} />
         <MetricChip label="C. inicial" value={`${previewConcentration.toFixed(2)} kg/L`} />
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -400,7 +402,7 @@ function MiniLineChart({
   }));
 
   return (
-    <View style={styles.chartCard}>
+    <Animated.View entering={FadeIn.delay(200).duration(500)} style={styles.chartCard}>
       <View style={styles.chartHeader}>
         <Text style={styles.chartTitle}>{title}</Text>
         <Text style={styles.chartSubtitle}>{subtitle}</Text>
@@ -456,7 +458,7 @@ function MiniLineChart({
           <Text style={styles.chartAxisLabel}>{timeLabel}</Text>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -739,6 +741,36 @@ export function HomeScreen({ navigation, route }: Props) {
     });
   }
 
+  async function handleDeleteProblem(problemId: string, title?: string | null) {
+    Alert.alert(
+      "Borrar ejercicio",
+      `¿Estás seguro de que quieres borrar "${title || "Sistema de mezcla"}" del historial?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Borrar",
+          style: "destructive",
+          onPress: async () => {
+            playButtonSound();
+            try {
+              const res = await fetchWithAuth(`/history/problems/${problemId}`, {
+                method: "DELETE"
+              });
+              
+              if (res?.success) {
+                setProblems((current) => current.filter((p) => p.id !== problemId));
+              } else {
+                throw new Error("No pudimos procesar la eliminación");
+              }
+            } catch (error) {
+              Alert.alert("Error al borrar", error instanceof Error ? error.message : "Error inesperado");
+            }
+          }
+        }
+      ]
+    );
+  }
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -763,26 +795,6 @@ export function HomeScreen({ navigation, route }: Props) {
                   <Text style={styles.brand}>{sectionCopy[activeSection].title}</Text>
                   <Text style={styles.subtitle}>{sectionCopy[activeSection].subtitle}</Text>
                 </View>
-              </View>
-              <View style={styles.sectionTabsRow}>
-                <SectionTab
-                  active={activeSection === "resolver"}
-                  caption="modelo"
-                  label="Resolver"
-                  onPress={() => handleSectionChange("resolver")}
-                />
-                <SectionTab
-                  active={activeSection === "historial"}
-                  caption="memoria"
-                  label="Historial"
-                  onPress={() => handleSectionChange("historial")}
-                />
-                <SectionTab
-                  active={activeSection === "perfil"}
-                  caption="cuenta"
-                  label="Perfil"
-                  onPress={() => handleSectionChange("perfil")}
-                />
               </View>
             </View>
 
@@ -1121,7 +1133,8 @@ export function HomeScreen({ navigation, route }: Props) {
             const problemMeta = getProblemKindMeta(item);
 
             return (
-              <Pressable onPress={() => openProblemDetail(item)} style={[styles.card, index === 0 && styles.firstCard]}>
+              <Animated.View layout={LinearTransition.springify()} entering={FadeIn.delay(Math.min(index * 60, 500)).springify()} exiting={FadeOut.duration(250)}>
+                <Pressable onPress={() => openProblemDetail(item)} style={[styles.card, index === 0 && styles.firstCard]}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTitle}>{item.title || "Sistema de mezcla"}</Text>
                   <Text style={styles.badge}>{item.status}</Text>
@@ -1150,13 +1163,51 @@ export function HomeScreen({ navigation, route }: Props) {
                     ) : null}
                   </View>
                 ) : null}
-                <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
-                <Text style={styles.detailHint}>Abrir detalle</Text>
+                <View style={styles.cardFooter}>
+                  <Text style={styles.meta}>{new Date(item.createdAt).toLocaleString()}</Text>
+                  <View style={styles.cardActions}>
+                    <Pressable
+                      onPress={(e) => {
+                        e.stopPropagation();
+                        // Delay block to allow touch ripples to finish
+                        setTimeout(() => handleDeleteProblem(item.id, item.title), 50);
+                      }}
+                      style={styles.deleteButton}
+                    >
+                      <Text style={styles.deleteButtonText}>Borrar</Text>
+                    </Pressable>
+                    <Text style={styles.detailHint}>Abrir detalle</Text>
+                  </View>
+                </View>
               </Pressable>
+              </Animated.View>
             );
           })()
         )}
       />
+
+      <BlurView intensity={70} style={styles.floatingNavBar} tint="light">
+        <View style={styles.sectionTabsRow}>
+          <SectionTab
+            active={activeSection === "resolver"}
+            caption="modelo"
+            label="Resolver"
+            onPress={() => handleSectionChange("resolver")}
+          />
+          <SectionTab
+            active={activeSection === "historial"}
+            caption="memoria"
+            label="Historial"
+            onPress={() => handleSectionChange("historial")}
+          />
+          <SectionTab
+            active={activeSection === "perfil"}
+            caption="cuenta"
+            label="Perfil"
+            onPress={() => handleSectionChange("perfil")}
+          />
+        </View>
+      </BlurView>
     </SafeAreaView>
   );
 }
@@ -1174,7 +1225,24 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: spacing.lg,
+    paddingBottom: 130, // Make room for floating glass navigation
     gap: spacing.md
+  },
+  floatingNavBar: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    overflow: "hidden",
+    borderColor: "rgba(255,255,255,0.7)",
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
+    borderRightWidth: 1.5
   },
   header: {
     gap: spacing.md,
@@ -2113,10 +2181,34 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 13
   },
+  cardFooter: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: spacing.xs
+  },
+  cardActions: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.md
+  },
+  deleteButton: {
+    backgroundColor: "#fff0f0",
+    borderColor: "#ffcaca",
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4
+  },
+  deleteButtonText: {
+    color: "#d32f2f",
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase"
+  },
   detailHint: {
     color: colors.primaryDark,
     fontSize: 12,
-    fontWeight: "700",
-    marginTop: spacing.xs
+    fontWeight: "700"
   }
 });

@@ -221,3 +221,40 @@ historyRouter.post("/problems", async (req, res) => {
 
   res.status(201).json({ data: problem });
 });
+
+historyRouter.delete("/problems/:problemId", async (req, res) => {
+  const userId = req.user?.sub;
+  const email = req.user?.email ?? null;
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized." });
+  }
+
+  if (isDemoUser(email)) {
+    // In demo mode, history is kept only in frontend state.
+    // Returning success allows the mobile app to remove it from state.
+    return res.json({ success: true, message: "Problem deleted from demo state." });
+  }
+
+  try {
+    const problem = await prisma.problem.findFirst({
+      where: {
+        id: req.params.problemId,
+        userId
+      }
+    });
+
+    if (!problem) {
+      return res.status(404).json({ error: "Problem not found." });
+    }
+
+    await prisma.problem.delete({
+      where: { id: req.params.problemId }
+    });
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting problem:", error);
+    return res.status(500).json({ error: "Failed to delete problem." });
+  }
+});

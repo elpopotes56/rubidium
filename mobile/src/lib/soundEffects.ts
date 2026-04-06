@@ -1,4 +1,5 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
+import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef } from "react";
 
 const buttonSource = require("../../assets/button-tap.mp3");
@@ -59,6 +60,7 @@ export function useSoundEffects() {
     player.pause();
     player.seekTo(0).catch(() => undefined);
     player.play();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     buttonTimerRef.current = setTimeout(() => {
       player.pause();
@@ -80,6 +82,7 @@ export function useSoundEffects() {
     player.pause();
     player.seekTo(0).catch(() => undefined);
     player.play();
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     confirmationTimerRef.current = setTimeout(() => {
       player.pause();
