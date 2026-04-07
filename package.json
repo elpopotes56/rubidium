@@ -1,9 +1,0 @@
-{
-  "name": "rubidium-root",
-  "private": true,
-  "scripts": {
-    "install": "cd backend && npm install",
-    "build": "cd backend && npx prisma generate && npm run build",
-    "start": "cd backend && npm run start"
-  }
-}
