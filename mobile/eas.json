@@ -12,6 +12,14 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://gorcxhxuovsrzafgiazp.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvcmN4aHh1b3ZzcnphZmdpYXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE3MjkzOTcsImV4cCI6MjA4NzMwNTM5N30.BM15-hzCwG8-GK7etLUniI_r9cHLNOu8UCGsiah5bZI",
+        "EXPO_PUBLIC_API_URL": "https://rubidium-production.up.railway.app",
+        "EXPO_PUBLIC_DEMO_EMAIL": "rubidiumdemoaccess@gmail.com",
+        "EXPO_PUBLIC_DEMO_PASSWORD": "RubidiumDemo#2026",
+        "EXPO_PUBLIC_ELEVENLABS_AGENT_ID": "agent_5801kn0wk90wesxsh8c2hy07a77t"
       }
     },
     "production": {

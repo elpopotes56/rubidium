@@ -22,5 +22,5 @@ RUN npm run build
 # Expose the port
 EXPOSE 4000
 
-# Start the server
-CMD ["node", "dist/index.js"]
+# Start the server and ensure DB is migrated
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/index.js"]

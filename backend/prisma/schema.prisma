@@ -6,7 +6,7 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-  schemas   = ["public", "auth"]
+  schemas   = ["public"]
 }
 
 enum ProblemInputType {
@@ -36,15 +36,15 @@ enum SessionRole {
 }
 
 model Profile {
-  id             String          @id @db.Uuid
-  email          String?         @unique
-  fullName       String?         @map("full_name")
-  avatarUrl      String?         @map("avatar_url")
-  createdAt      DateTime        @default(now()) @map("created_at")
-  updatedAt      DateTime        @updatedAt @map("updated_at")
-  problems       Problem[]
-  solutionSteps  SolutionStep[]
-  voiceSessions  VoiceSession[]
+  id              String           @id @db.Uuid
+  email           String?          @unique
+  fullName        String?          @map("full_name")
+  avatarUrl       String?          @map("avatar_url")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  problems        Problem[]
+  solutionSteps   SolutionStep[]
+  voiceSessions   VoiceSession[]
   progressByTopic UserTopicStats[]
 
   @@map("math_mobile_profiles")
@@ -52,11 +52,11 @@ model Profile {
 }
 
 model Topic {
-  id          String          @id @default(uuid()) @db.Uuid
-  slug        String          @unique
+  id          String           @id @default(uuid()) @db.Uuid
+  slug        String           @unique
   name        String
   description String?
-  createdAt   DateTime        @default(now()) @map("created_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
   problems    Problem[]
   userStats   UserTopicStats[]
 
@@ -66,14 +66,14 @@ model Topic {
 
 model Problem {
   id             String           @id @default(uuid()) @db.Uuid
-  userId         String           @db.Uuid @map("user_id")
-  topicId        String?          @db.Uuid @map("topic_id")
+  userId         String           @map("user_id") @db.Uuid
+  topicId        String?          @map("topic_id") @db.Uuid
   title          String?
   prompt         String           @db.Text
-  normalizedText String?          @db.Text @map("normalized_text")
+  normalizedText String?          @map("normalized_text") @db.Text
   inputType      ProblemInputType @default(text) @map("input_type")
   status         ProblemStatus    @default(pending)
-  finalAnswer    String?          @db.Text @map("final_answer")
+  finalAnswer    String?          @map("final_answer") @db.Text
   explanation    String?          @db.Text
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime         @updatedAt @map("updated_at")
@@ -89,16 +89,16 @@ model Problem {
 }
 
 model SolutionStep {
-  id          String      @id @default(uuid()) @db.Uuid
-  problemId   String      @db.Uuid @map("problem_id")
-  userId      String      @db.Uuid @map("user_id")
-  stepNumber  Int         @map("step_number")
+  id          String   @id @default(uuid()) @db.Uuid
+  problemId   String   @map("problem_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  stepNumber  Int      @map("step_number")
   title       String?
-  explanation String      @db.Text
-  latex       String?     @db.Text
-  createdAt   DateTime    @default(now()) @map("created_at")
-  problem     Problem     @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  user        Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  explanation String   @db.Text
+  latex       String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  problem     Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  user        Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([problemId, stepNumber])
   @@index([userId, createdAt])
@@ -107,17 +107,17 @@ model SolutionStep {
 }
 
 model VoiceSession {
-  id             String      @id @default(uuid()) @db.Uuid
-  problemId      String?     @db.Uuid @map("problem_id")
-  userId         String      @db.Uuid @map("user_id")
-  provider       String      @default("elevenlabs")
-  externalCallId String?     @map("external_call_id")
-  transcript     String?     @db.Text
-  summary        String?     @db.Text
-  startedAt      DateTime    @default(now()) @map("started_at")
-  endedAt        DateTime?   @map("ended_at")
-  problem        Problem?    @relation(fields: [problemId], references: [id], onDelete: SetNull)
-  user           Profile     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String         @id @default(uuid()) @db.Uuid
+  problemId      String?        @map("problem_id") @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  provider       String         @default("elevenlabs")
+  externalCallId String?        @map("external_call_id")
+  transcript     String?        @db.Text
+  summary        String?        @db.Text
+  startedAt      DateTime       @default(now()) @map("started_at")
+  endedAt        DateTime?      @map("ended_at")
+  problem        Problem?       @relation(fields: [problemId], references: [id], onDelete: SetNull)
+  user           Profile        @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages       VoiceMessage[]
 
   @@index([userId, startedAt])
@@ -128,7 +128,7 @@ model VoiceSession {
 
 model VoiceMessage {
   id             String       @id @default(uuid()) @db.Uuid
-  voiceSessionId String       @db.Uuid @map("voice_session_id")
+  voiceSessionId String       @map("voice_session_id") @db.Uuid
   role           SessionRole
   content        String       @db.Text
   createdAt      DateTime     @default(now()) @map("created_at")
@@ -140,17 +140,17 @@ model VoiceMessage {
 }
 
 model UserTopicStats {
-  id               String   @id @default(uuid()) @db.Uuid
-  userId           String   @db.Uuid @map("user_id")
-  topicId          String   @db.Uuid @map("topic_id")
-  solvedCount      Int      @default(0) @map("solved_count")
-  failedCount      Int      @default(0) @map("failed_count")
-  lastProblemAt    DateTime? @map("last_problem_at")
-  averageScore     Float?   @map("average_score")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-  user             Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topic            Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  topicId       String    @map("topic_id") @db.Uuid
+  solvedCount   Int       @default(0) @map("solved_count")
+  failedCount   Int       @default(0) @map("failed_count")
+  lastProblemAt DateTime? @map("last_problem_at")
+  averageScore  Float?    @map("average_score")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  user          Profile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic         Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@unique([userId, topicId])
   @@index([userId])
