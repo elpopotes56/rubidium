@@ -23,4 +23,4 @@ RUN npm run build
 EXPOSE 4000
 
 # Start the server and ensure DB is migrated
-CMD ["sh", "-c", "node pre-push.js && npx prisma db push --accept-data-loss --skip-generate && node dist/index.js"]
+CMD ["node", "dist/index.js"]
